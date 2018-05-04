@@ -50,8 +50,10 @@ returned in a regular fashion and run-time exception is being thrown in case of
 negative error code."
 %enddef
 
-#if SWIGJAVA
+#if SWIGJAVA || SWIGCSHARP || SWIGJAVASCRIPT
 %module PocketSphinx
+#elif SWIGRUBY
+%module pocketsphinx
 #else
 %module(docstring=DOCSTRING) pocketsphinx
 #endif
@@ -107,6 +109,11 @@ typedef ps_decoder_t NBestList;
 typedef ps_lattice_t Lattice;
 %}
 
+%typemap(cscode) Segment %{
+    public override string ToString() {
+	return Word + " " + StartFrame + " " + EndFrame + " " + Prob;
+    }
+%}
 
 %inline %{
 
@@ -119,20 +126,21 @@ typedef struct {
 
 typedef struct {
     char *word;
-    int32 ascore;
-    int32 lscore;
-    int32 lback;
-    int32 prob;
+    int ascore;
+    int lscore;
+    int lback;
+    int prob;
     int start_frame;
     int end_frame;
 } Segment;
 
 typedef struct {
     char *hypstr;
-    int32 score;
+    int score;
 } NBest;
 
 %}
+
 
 %nodefaultctor SegmentList;
 %nodefaultctor NBestList;
@@ -173,14 +181,14 @@ typedef struct {} SegmentList;
 
 %extend Segment {
 
-    static Segment* fromIter(ps_seg_t *itor) {
+    static Segment* fromIter(void *itor) {
 	Segment *seg;
 	if (!itor)
 	    return NULL;
 	seg = (Segment *)ckd_malloc(sizeof(Segment));
-	seg->word = ckd_salloc(ps_seg_word(itor));
-	seg->prob = ps_seg_prob(itor, &(seg->ascore), &(seg->lscore), &(seg->lback));
-	ps_seg_frames(itor, &seg->start_frame, &seg->end_frame);
+	seg->word = ckd_salloc(ps_seg_word((ps_seg_t *)itor));
+	seg->prob = ps_seg_prob((ps_seg_t *)itor, &(seg->ascore), &(seg->lscore), &(seg->lback));
+	ps_seg_frames((ps_seg_t *)itor, &seg->start_frame, &seg->end_frame);
 	return seg;
     }
     ~Segment() {
@@ -189,14 +197,15 @@ typedef struct {} SegmentList;
     }
 }
 
+
 %extend NBest {
 
-    static NBest* fromIter(ps_nbest_t *itor) {
+    static NBest* fromIter(void *itor) {
 	NBest *nbest;
 	if (!itor)
 	    return NULL;
 	nbest = (NBest *)ckd_malloc(sizeof(NBest));
-	nbest->hypstr = ckd_salloc(ps_nbest_hyp(itor, &(nbest->score)));
+	nbest->hypstr = ckd_salloc(ps_nbest_hyp((ps_nbest_t *)itor, &(nbest->score)));
 	return nbest;
     }
     

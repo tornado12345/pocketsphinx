@@ -138,7 +138,7 @@
         return *errcode = ps_process_raw($self, data, length, no_search, full_utt);
     }
 #elif SWIGJAVA
-    int process_raw(const int16 *SDATA, size_t NSAMP, bool no_search, bool full_utt,
+    int process_raw(const short *SDATA, size_t NSAMP, bool no_search, bool full_utt,
                 int *errcode) {
         return *errcode = ps_process_raw($self, SDATA, NSAMP, no_search, full_utt);
     }
@@ -147,7 +147,13 @@
                 int *errcode) {
         return *errcode = ps_process_raw($self, (const int16 *)STRING, SIZE / 2, no_search, full_utt);
     }
+#elif SWIGCSHARP
+    int process_raw(const unsigned char* SDATA, int SIZE, bool no_search, bool full_utt,
+                int *errcode) {
+        return *errcode = ps_process_raw($self, (const int16 *)SDATA, SIZE / 2, no_search, full_utt);
+    }
 #endif
+
 
 #ifdef SWIGJAVA
     // Not sure how to properly return binary buffer in python yet (python3 is also an issue)
@@ -155,8 +161,8 @@
 	ps_set_rawdata_size($self, size);
     }
 
-    int16 *get_rawdata(int32 *RAWDATA_SIZE) {
-	int16 *result;
+    short *get_rawdata(int *RAWDATA_SIZE) {
+	short *result;
 	ps_get_rawdata($self, &result, RAWDATA_SIZE);
 	return result;
     }
@@ -165,7 +171,7 @@
     %newobject hyp;
     Hypothesis * hyp() {
         char const *hyp;
-        int32 best_score, prob;
+        int best_score, prob;
         hyp = ps_get_hyp($self, &best_score);
         if (hyp)
             prob = ps_get_prob($self);
