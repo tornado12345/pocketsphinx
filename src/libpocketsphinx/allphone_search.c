@@ -62,6 +62,8 @@ allphone_search_prob(ps_search_t * search)
 
 static void
 allphone_backtrace(allphone_search_t * allphs, int32 f, int32 *out_score);
+static void
+allphone_clear_segments(allphone_search_t * allphs);
 
 static void
 allphone_search_seg_free(ps_seg_t * seg)
@@ -648,6 +650,7 @@ allphone_search_free(ps_search_t * search)
 
     ps_search_base_free(search);
 
+    allphone_clear_segments(allphs);
     hmm_context_free(allphs->hmmctx);
     phmm_free(allphs);
     if (allphs->lm)
